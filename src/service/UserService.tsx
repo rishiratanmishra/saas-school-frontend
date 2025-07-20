@@ -126,19 +126,12 @@ export const useCreateNewUser = () => {
 
 export const getUserList = (payload: any) => (axios: AxiosInstance) =>
   axios.post(`${USER_BASE_URL}/list`, payload);
-
 export const useGetUserList = (payload: any) => {
-  const accessToken = useSelector(selectAccessToken);
-  const refreshToken = useSelector(selectRefreshToken);
-
   return useQuery({
     queryKey: [QUERY_KEYS.USERS, payload],
     queryFn: () =>
       callApi({
         requestFunction: getUserList(payload),
-        accessToken,
-        refreshToken,
       }),
-    enabled: !!accessToken,
   });
 };

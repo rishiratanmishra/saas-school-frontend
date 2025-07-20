@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { use } from 'react';
 import { FormikHelpers, useFormikContext, FieldArray } from 'formik';
 import { Button } from '@/components/ui/button';
 import { FormikForm } from '@/components/ui/data-entry/FormikForm';
 import {
   CNCheckboxField,
   CNDatePickerField,
+  CNRadioGroupField,
   CNSelectField,
   CNTextAreaField,
   CNTextInputField,
@@ -27,9 +28,13 @@ import {
   Quote,
   Plus,
   Trash2,
+  User,
 } from 'lucide-react';
 import { generateSlug } from '@/components/helpers/helpers';
-import OrganisationZodSchema, { IOrganisationZS } from '@/zod/src/features/organisation/organisation.zod';
+import OrganisationZodSchema, {
+  IOrganisationZS,
+} from '@/zod/src/features/organisation/organisation.zod';
+import { useGetUserList } from '@/service/UserService';
 
 export type OrganisationFormValues = IOrganisationZS;
 
@@ -104,6 +109,9 @@ const AutoSlugHandler: React.FC = () => {
 // Address Field Array Component
 const AddressFieldArray: React.FC = () => {
   const { values } = useFormikContext<OrganisationFormValues>();
+  const { data, isLoading } = useGetUserList({ status: 'ACTIVE' });
+
+  console.log('userList', data);
 
   return (
     <FieldArray name="address">
@@ -305,221 +313,280 @@ interface OrganisationFormContentProps {
 
 const OrganisationFormContent: React.FC<OrganisationFormContentProps> = ({
   isSubmitting = false,
-}) => (
-  <div className="space-y-6">
-    {/* Basic Information Section */}
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Building2 className="w-5 h-5" />
-          Basic Information
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CNTextInputField
-            label="Organisation Name"
-            name="name"
-            placeholder="Enter organisation name"
-            required
-          />
-          <AutoSlugHandler />
+}) => {
+  const { values } = useFormikContext<OrganisationFormValues>();
+  return (
+    <>
+      <div className="space-y-6">
+        {/* Basic Information Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="w-5 h-5" />
+              Basic Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CNTextInputField
+                label="Organisation Name"
+                name="name"
+                placeholder="Enter organisation name"
+                required
+              />
+              <AutoSlugHandler />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CNSelectField
+                label="Organisation Type"
+                name="organisationType"
+                required
+                placeholder="Select type"
+                options={ORGANISATION_TYPE_OPTIONS}
+              />
+              <CNSelectField
+                label="Board/Curriculum"
+                name="boardType"
+                required
+                placeholder="Select board"
+                options={BOARD_TYPE_OPTIONS}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CNTextInputField
+                label="Website Domain"
+                name="domain"
+                placeholder="e.g., example.com"
+              />
+              <CNDatePickerField
+                label="Established Date"
+                name="established"
+                placeholder="Select establishment date"
+              />
+            </div>
+
+            <CNTextInputField
+              label="Motto"
+              name="motto"
+              placeholder="Organization motto or tagline"
+            />
+          </CardContent>
+        </Card>
+
+        {/* Visual Identity Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Image className="w-5 h-5" />
+              Visual Identity
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CNTextInputField
+                label="Logo URL"
+                name="logo"
+                placeholder="https://example.com/logo.png"
+              />
+              <CNTextInputField
+                label="Cover Image URL"
+                name="coverImage"
+                placeholder="https://example.com/cover.jpg"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Description Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              About the Organisation
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CNTextAreaField
+              label="Description"
+              name="description"
+              rows={6}
+              placeholder="Detailed description of the organisation, its mission, vision, and key features..."
+              description="This will be displayed on the organization's profile page"
+            />
+          </CardContent>
+        </Card>
+
+        {/* Address Section with FieldArray */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="w-5 h-5" />
+              Address Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <AddressFieldArray />
+          </CardContent>
+        </Card>
+
+        {/* Contact Information Section with FieldArray */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Phone className="w-5 h-5" />
+              Contact Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ContactFieldArray />
+          </CardContent>
+        </Card>
+
+        {/* Social Media Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Share2 className="w-5 h-5" />
+              Social Media Presence
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CNTextInputField
+                label="Facebook"
+                name="socialMedia.facebook"
+                placeholder="https://facebook.com/yourorganization"
+              />
+              <CNTextInputField
+                label="Instagram"
+                name="socialMedia.instagram"
+                placeholder="https://instagram.com/yourorganization"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CNTextInputField
+                label="Twitter"
+                name="socialMedia.twitter"
+                placeholder="https://twitter.com/yourorganization"
+              />
+              <CNTextInputField
+                label="LinkedIn"
+                name="socialMedia.linkedin"
+                placeholder="https://linkedin.com/company/yourorganization"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CNTextInputField
+                label="YouTube"
+                name="socialMedia.youtube"
+                placeholder="https://youtube.com/c/yourorganization"
+              />
+              <CNTextInputField
+                label="Website"
+                name="socialMedia.website"
+                placeholder="https://yourorganization.com"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Status Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Award className="w-5 h-5" />
+              Status & Settings
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CNCheckboxField
+              label="Active Organisation"
+              name="isActive"
+              description="Enable this organisation for operations and make it visible to users"
+            />
+          </CardContent>
+        </Card>
+        {/* Status Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Award className="w-5 h-5" />
+              Status & Settings
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <CNCheckboxField
+              label="Active Organisation"
+              name="isActive"
+              description="Enable this organisation for operations and make it visible to users"
+            />
+          </CardContent>
+        </Card>
+        {/* Admin Information Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="w-5 h-5" />
+              Admin Info
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <CNRadioGroupField
+              name="adminOption"
+              label="Assign Admin"
+              options={[
+                { label: 'Enter Name & Email', value: 'manual' },
+                { label: 'Choose from User List', value: 'select' },
+              ]}
+            />
+
+            {values.adminOption === 'manual' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <CNTextInputField name="admin.name" label="Admin Name" />
+                <CNTextInputField name="admin.email" label="Admin Email" />
+              </div>
+            )}
+
+            {values.adminOption === 'select' && (
+              <CNSelectField
+                name="admin.userId"
+                label="Select Admin User"
+                placeholder="Choose user from list"
+                options={userList.map((user) => ({
+                  label: `${user.name.first} ${user.name.last} (${user.email})`,
+                  value: user._id,
+                }))}
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Submit Button */}
+        <div className="sticky bottom-0 bg-background pt-6 pb-4 border-t">
+          <Button
+            type="submit"
+            className="w-full h-12 text-base font-medium"
+            disabled={isSubmitting}
+            size="lg"
+          >
+            {isSubmitting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                Creating Organisation...
+              </>
+            ) : (
+              'Create Organisation'
+            )}
+          </Button>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CNSelectField
-            label="Organisation Type"
-            name="organisationType"
-            required
-            placeholder="Select type"
-            options={ORGANISATION_TYPE_OPTIONS}
-          />
-          <CNSelectField
-            label="Board/Curriculum"
-            name="boardType"
-            required
-            placeholder="Select board"
-            options={BOARD_TYPE_OPTIONS}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CNTextInputField
-            label="Website Domain"
-            name="domain"
-            placeholder="e.g., example.com"
-          />
-          <CNDatePickerField
-            label="Established Date"
-            name="established"
-            placeholder="Select establishment date"
-          />
-        </div>
-
-        <CNTextInputField
-          label="Motto"
-          name="motto"
-          placeholder="Organization motto or tagline"
-        />
-      </CardContent>
-    </Card>
-
-    {/* Visual Identity Section */}
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Image className="w-5 h-5" />
-          Visual Identity
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CNTextInputField
-            label="Logo URL"
-            name="logo"
-            placeholder="https://example.com/logo.png"
-          />
-          <CNTextInputField
-            label="Cover Image URL"
-            name="coverImage"
-            placeholder="https://example.com/cover.jpg"
-          />
-        </div>
-      </CardContent>
-    </Card>
-
-    {/* Description Section */}
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="w-5 h-5" />
-          About the Organisation
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <CNTextAreaField
-          label="Description"
-          name="description"
-          rows={6}
-          placeholder="Detailed description of the organisation, its mission, vision, and key features..."
-          description="This will be displayed on the organization's profile page"
-        />
-      </CardContent>
-    </Card>
-
-    {/* Address Section with FieldArray */}
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MapPin className="w-5 h-5" />
-          Address Information
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <AddressFieldArray />
-      </CardContent>
-    </Card>
-
-    {/* Contact Information Section with FieldArray */}
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Phone className="w-5 h-5" />
-          Contact Information
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ContactFieldArray />
-      </CardContent>
-    </Card>
-
-    {/* Social Media Section */}
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Share2 className="w-5 h-5" />
-          Social Media Presence
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CNTextInputField
-            label="Facebook"
-            name="socialMedia.facebook"
-            placeholder="https://facebook.com/yourorganization"
-          />
-          <CNTextInputField
-            label="Instagram"
-            name="socialMedia.instagram"
-            placeholder="https://instagram.com/yourorganization"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CNTextInputField
-            label="Twitter"
-            name="socialMedia.twitter"
-            placeholder="https://twitter.com/yourorganization"
-          />
-          <CNTextInputField
-            label="LinkedIn"
-            name="socialMedia.linkedin"
-            placeholder="https://linkedin.com/company/yourorganization"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <CNTextInputField
-            label="YouTube"
-            name="socialMedia.youtube"
-            placeholder="https://youtube.com/c/yourorganization"
-          />
-          <CNTextInputField
-            label="Website"
-            name="socialMedia.website"
-            placeholder="https://yourorganization.com"
-          />
-        </div>
-      </CardContent>
-    </Card>
-
-    {/* Status Section */}
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Award className="w-5 h-5" />
-          Status & Settings
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <CNCheckboxField
-          label="Active Organisation"
-          name="isActive"
-          description="Enable this organisation for operations and make it visible to users"
-        />
-      </CardContent>
-    </Card>
-
-    {/* Submit Button */}
-    <div className="sticky bottom-0 bg-background pt-6 pb-4 border-t">
-      <Button
-        type="submit"
-        className="w-full h-12 text-base font-medium"
-        disabled={isSubmitting}
-        size="lg"
-      >
-        {isSubmitting ? (
-          <>
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-            Creating Organisation...
-          </>
-        ) : (
-          'Create Organisation'
-        )}
-      </Button>
-    </div>
-  </div>
-);
+      </div>
+    </>
+  );
+};
 
 interface OrganisationFormProps {
   initialValues?: Partial<OrganisationFormValues>;
