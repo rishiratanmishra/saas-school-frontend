@@ -1,5 +1,8 @@
-const page = () => {
-  return <>Teacher</>;
+
+import React from 'react';
+
+const Page = () => {
+  return <div>User Root Page</div>;
 };
 
-export default page;
+export default Page;
