@@ -21,7 +21,7 @@ const LoginPage = () => {
     if (isAuthenticated) {
       router.push('/');
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, router]);
 
   return (
     <div className="min-h-screen w-full relative overflow-hidden">
@@ -85,7 +85,7 @@ const LoginPage = () => {
 
               <p className="text-xl text-white/80 max-w-md mx-auto lg:mx-0 leading-relaxed">
                 Access your Campus Connect dashboard and continue building
-                India's educational future.
+                {"India's"} educational future.
               </p>
             </div>
 

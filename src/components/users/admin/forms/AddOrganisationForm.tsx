@@ -56,7 +56,7 @@ const AddOrganisationForm: React.FC<AddOrganisationFormProps> = ({
         isPublic: true,
       },
     ],
-    isActive: false,
+    status: 'ACTIVE',
   };
 
   const handleSubmit = async (

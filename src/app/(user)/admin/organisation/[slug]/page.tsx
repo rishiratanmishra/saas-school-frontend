@@ -4,13 +4,17 @@ import { useGetOrganisationDetails } from '@/service/OrganisationService';
 import { useParams } from 'next/navigation';
 import React from 'react';
 
-const page = () => {
-  const params = useParams();
-  const organisationId = params.slug;
+const Page = () => {
+  const { slug } = useParams();
+
   const { data: organisation } = useGetOrganisationDetails({
-    _id: organisationId,
+    _id: slug,
   });
-  console.log('Organisation Details:', organisation);
+
+  if (!slug) {
+    return <div>Error: Missing organisation slug.</div>;
+  }
+
   return (
     <div>
       <OrganisationDetails organisation={organisation?.data} />
@@ -18,4 +22,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

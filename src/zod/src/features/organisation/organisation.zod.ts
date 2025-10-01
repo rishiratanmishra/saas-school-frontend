@@ -122,7 +122,7 @@ export const OrganisationZodSchema = z.object({
   address: z.array(AddressSchema).optional(),
   socialMedia: SocialMediaSchema.optional(),
   contactInfo: z.array(ContactInfoSchema).optional(),
-  isActive: z.boolean().default(false),
+  status: z.string().default('ACTIVE'),
 });
 
 export type IOrganisationZS = z.infer<typeof OrganisationZodSchema>;

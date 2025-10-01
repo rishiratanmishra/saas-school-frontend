@@ -106,7 +106,7 @@ export async function callApi<T>({
       toast.success(response.data.message || 'Success!');
     }
 
-    return response.data;
+    return response?.data;
   } catch (error: any) {
     const message =
       error?.response?.data?.message || error.message || 'Unknown error';

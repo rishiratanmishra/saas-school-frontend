@@ -109,10 +109,6 @@ const AutoSlugHandler: React.FC = () => {
 // Address Field Array Component
 const AddressFieldArray: React.FC = () => {
   const { values } = useFormikContext<OrganisationFormValues>();
-  const { data, isLoading } = useGetUserList({ status: 'ACTIVE' });
-
-  console.log('userList', data);
-
   return (
     <FieldArray name="address">
       {({ push, remove }) => (
@@ -307,6 +303,67 @@ const ContactFieldArray: React.FC = () => {
   );
 };
 
+export const AdminInfoCard = () => {
+  const { values } = useFormikContext<any>();
+
+  const { data, isLoading } = useGetUserList({ status: 'ACTIVE' });
+  const userList = data?.data?.users || [];
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <User className="w-5 h-5" />
+          Admin Info
+        </CardTitle>
+      </CardHeader>
+
+      <CardContent className="space-y-4">
+        <CNRadioGroupField
+          name="adminOption"
+          label="Assign Admin"
+          options={[
+            { label: 'Enter Name & Email', value: 'manual' },
+            { label: 'Choose from User List', value: 'select' },
+          ]}
+        />
+
+        {values.adminOption === 'manual' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CNTextInputField name="admin.name.first" label="Admin Name" />
+            <CNTextInputField name="admin.name.last" label="Last Name" />
+            <CNTextInputField name="admin.email" label="Admin Email" />
+          </div>
+        )}
+
+        {values.adminOption === 'select' && (
+          <>
+            {!isLoading ? (
+              <CNSelectField
+                name="admin.userId"
+                label="Select Admin User"
+                placeholder="Choose user from list"
+                options={userList.map((user) => ({
+                  label: `${user.name.first} ${user.name.last} (${user.email})`,
+                  value: user._id,
+                }))}
+              />
+            ) : (
+              <p className="text-muted-foreground text-sm">Loading users...</p>
+            )}
+
+            {userList.length === 0 && !isLoading && (
+              <p className="text-sm text-muted-foreground">
+                No active users found.
+              </p>
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 interface OrganisationFormContentProps {
   isSubmitting?: boolean;
 }
@@ -379,7 +436,7 @@ const OrganisationFormContent: React.FC<OrganisationFormContentProps> = ({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Image className="w-5 h-5" />
+              {/* <Image className="w-5 h-5" /> */}
               Visual Identity
             </CardTitle>
           </CardHeader>
@@ -505,65 +562,14 @@ const OrganisationFormContent: React.FC<OrganisationFormContentProps> = ({
           <CardContent>
             <CNCheckboxField
               label="Active Organisation"
-              name="isActive"
+              name="status"
               description="Enable this organisation for operations and make it visible to users"
             />
           </CardContent>
         </Card>
-        {/* Status Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Award className="w-5 h-5" />
-              Status & Settings
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CNCheckboxField
-              label="Active Organisation"
-              name="isActive"
-              description="Enable this organisation for operations and make it visible to users"
-            />
-          </CardContent>
-        </Card>
+        
         {/* Admin Information Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="w-5 h-5" />
-              Admin Info
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <CNRadioGroupField
-              name="adminOption"
-              label="Assign Admin"
-              options={[
-                { label: 'Enter Name & Email', value: 'manual' },
-                { label: 'Choose from User List', value: 'select' },
-              ]}
-            />
-
-            {values.adminOption === 'manual' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <CNTextInputField name="admin.name" label="Admin Name" />
-                <CNTextInputField name="admin.email" label="Admin Email" />
-              </div>
-            )}
-
-            {values.adminOption === 'select' && (
-              <CNSelectField
-                name="admin.userId"
-                label="Select Admin User"
-                placeholder="Choose user from list"
-                options={userList.map((user) => ({
-                  label: `${user.name.first} ${user.name.last} (${user.email})`,
-                  value: user._id,
-                }))}
-              />
-            )}
-          </CardContent>
-        </Card>
+        <AdminInfoCard />
 
         {/* Submit Button */}
         <div className="sticky bottom-0 bg-background pt-6 pb-4 border-t">
